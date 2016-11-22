@@ -15,7 +15,6 @@ func (c *Cipher) initCipher() {
     copy(c.s3[0:], s3[0:])
 
     c.Buffer = make([]byte, 8)
-    copy(c.Buffer, initBlock)
 }
 
 func NewCipher(key []byte) (*Cipher, error) {
