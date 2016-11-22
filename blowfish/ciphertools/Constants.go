@@ -186,4 +186,6 @@ var p = [18]uint32{
     0xc0ac29b7, 0xc97c50dd, 0x3f84d5b5, 0xb5470917, 0x9216d5d9, 0x8979fb1b,
 }
 
-
+var initBlock = []byte{
+    1, 2, 3, 4, 5, 6, 7, 8,
+}

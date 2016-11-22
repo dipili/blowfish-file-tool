@@ -8,6 +8,7 @@ import (
     "time"
     "github.com/diplombmstu/blowfish-file-tool/blowfish/ciphertools"
     "github.com/diplombmstu/blowfish-file-tool/blowfish/options"
+    "encoding/binary"
 )
 
 func Decrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool) error {
@@ -52,7 +53,7 @@ func Decrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool
                 return nil
             }
 
-            transformedBlock := cipher.Decrypt(block)
+            transformedBlock := decryptBlock(cipher, block, mode)
             if _, err = writer.Write(transformedBlock[:8 - extraSymbolCount]); err != nil {
                 return err
             }
@@ -60,7 +61,8 @@ func Decrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool
             break
         }
 
-        decryptedBlock := cipher.Decrypt(block)
+        decryptedBlock := decryptBlock(cipher, block, mode)
+
         _, err = writer.Write(decryptedBlock)
         if err != nil {
             return err
@@ -82,19 +84,118 @@ func Decrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool
     return nil
 }
 
-func encryptBlock(cipher *ciphertools.Cipher, block []byte, mode string) []byte {
+func xorBytes(a, b []byte) (dst []byte, n int) {
+    n = len(a)
+    dst = make([]byte, n)
+
+    if len(b) < n {
+        n = len(b)
+    }
+
+    for i := 0; i < n; i++ {
+        dst[i] = a[i] ^ b[i]
+    }
+
+    return
+}
+
+func decryptBlock(cipher *ciphertools.Cipher, cipherText []byte, mode string) []byte {
+    block2decrypt := cipherText
+
     switch mode {
-    case options.MODE_ECB:
+    case options.MODE_ECB, options.MODE_CBC, options.MODE_PCBC:
         // nothing
         break
-    case options.MODE_CBC:
+    case options.MODE_CFB, options.MODE_OFB, options.MODE_CTR:
+        copy(block2decrypt, cipher.Buffer)
         break
     default:
         panic("An unknown mode was selected.")
     }
 
-    encryptedBlock := cipher.Encrypt(block)
-    return encryptedBlock
+    plaintText := cipher.Decrypt(block2decrypt)
+
+    switch mode {
+    case options.MODE_ECB:
+        // nothing
+        break
+    case options.MODE_CBC:
+        plaintText, _ = xorBytes(cipher.Buffer, plaintText)
+        copy(cipher.Buffer, cipherText)
+        break
+    case options.MODE_PCBC:
+        plaintText, _ = xorBytes(plaintText, cipher.Buffer)
+        cipher.Buffer, _ = xorBytes(plaintText, cipherText)
+        break
+    case options.MODE_CFB:
+        plaintText, _ = xorBytes(plaintText, cipherText)
+        copy(cipher.Buffer, cipherText)
+        break
+    case options.MODE_OFB:
+        copy(cipher.Buffer, plaintText)
+        plaintText, _ = xorBytes(plaintText, cipherText)
+        break
+    case options.MODE_CTR:
+        counter := binary.BigEndian.Uint64(cipher.Buffer) + 1
+        binary.BigEndian.PutUint64(cipher.Buffer, counter)
+
+        plaintText, _ = xorBytes(plaintText, cipherText)
+        break
+    default:
+        panic("An unknown mode was selected.")
+    }
+
+    return plaintText
+}
+
+func encryptBlock(cipher *ciphertools.Cipher, plaintText []byte, mode string) []byte {
+    block2encrypt := plaintText
+
+    switch mode {
+    case options.MODE_ECB:
+        // nothing
+        break
+    case options.MODE_CBC, options.MODE_PCBC:
+        block2encrypt, _ = xorBytes(plaintText, cipher.Buffer)
+        break
+    case options.MODE_CFB, options.MODE_OFB, options.MODE_CTR:
+        copy(block2encrypt, cipher.Buffer)
+        break
+    default:
+        panic("An unknown mode was selected.")
+    }
+
+    cipherText := cipher.Encrypt(block2encrypt)
+
+    switch mode {
+    case options.MODE_ECB:
+        // nothing
+        break
+    case options.MODE_CBC:
+        copy(cipher.Buffer, cipherText)
+        break
+    case options.MODE_PCBC:
+        cipher.Buffer, _ = xorBytes(cipherText, plaintText)
+        break
+    case options.MODE_CFB:
+        cipherText, _ = xorBytes(cipherText, plaintText)
+        copy(cipher.Buffer, cipherText)
+        break
+    case options.MODE_OFB:
+        copy(cipher.Buffer, cipherText)
+        cipherText, _ = xorBytes(cipherText, plaintText)
+        break
+    case options.MODE_CTR:
+        counter := binary.BigEndian.Uint64(cipher.Buffer) + 1
+        binary.BigEndian.PutUint64(cipher.Buffer, counter)
+
+        cipherText, _ = xorBytes(cipherText, plaintText)
+        break
+    default:
+        panic("An unknown mode was selected.")
+    }
+
+    return cipherText
 }
 
 func Encrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool) error {

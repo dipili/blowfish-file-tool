@@ -3,6 +3,8 @@ package ciphertools
 type Cipher struct {
     p              [18]uint32
     s0, s1, s2, s3 [256]uint32
+
+    Buffer         []byte
 }
 
 func (c *Cipher) initCipher() {
@@ -11,6 +13,9 @@ func (c *Cipher) initCipher() {
     copy(c.s1[0:], s1[0:])
     copy(c.s2[0:], s2[0:])
     copy(c.s3[0:], s3[0:])
+
+    c.Buffer = make([]byte, 8)
+    copy(c.Buffer, initBlock)
 }
 
 func NewCipher(key []byte) (*Cipher, error) {
