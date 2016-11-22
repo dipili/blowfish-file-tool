@@ -54,9 +54,9 @@ func main() {
 
     var errOperation error
     if pars.Encryption {
-        errOperation = files.Encrypt(inputFile, outputFile, key, pars.Mode, pars.Debug)
+        errOperation = files.Encrypt(inputFile, outputFile, key, pars.Mode)
     } else {
-        errOperation = files.Decrypt(inputFile, outputFile, key, pars.Mode, pars.Debug)
+        errOperation = files.Decrypt(inputFile, outputFile, key, pars.Mode)
     }
 
     if errOperation != nil {

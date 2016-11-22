@@ -12,7 +12,7 @@ import (
     "crypto/rand"
 )
 
-func Decrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool) error {
+func Decrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
     fmt.Printf("Decrypting file %v... \n", inputFile.Name())
 
     startTime := time.Now()
@@ -80,18 +80,16 @@ func Decrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool
 
     fmt.Println("Decrypting successfully finished.")
 
-    if debug {
-        afterEncrypting := time.Now()
-        fmt.Println("\nStatistic:")
-        fmt.Printf("Time spent on blowfish algorithm: %v\n", afterExpandingKey.UnixNano() - startTime.UnixNano())
-        fmt.Printf("Time spent on encrypting: %v\n", afterEncrypting.UnixNano() - afterExpandingKey.UnixNano())
-        fmt.Printf("Time spent: %v\n", afterEncrypting.UnixNano() - startTime.UnixNano())
-    }
+    afterEncrypting := time.Now()
+    fmt.Println("\nStatistic:")
+    fmt.Printf("Time spent on blowfish algorithm: %v\n", afterExpandingKey.UnixNano() - startTime.UnixNano())
+    fmt.Printf("Time spent on encrypting: %v\n", afterEncrypting.UnixNano() - afterExpandingKey.UnixNano())
+    fmt.Printf("Time spent: %v\n", afterEncrypting.UnixNano() - startTime.UnixNano())
 
     return nil
 }
 
-func Encrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool) error {
+func Encrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
     fmt.Printf("Encrypting file %v... \n", inputFile.Name())
 
     startTime := time.Now()
@@ -141,13 +139,11 @@ func Encrypt(inputFile, outputFile *os.File, key []byte, mode string, debug bool
 
     fmt.Println("Encrypting successfully finished.")
 
-    if debug {
-        afterEncrypting := time.Now()
-        fmt.Println("\nStatistic:")
-        fmt.Printf("Time spent on blowfish algorithm: %v\n", afterExpandingKey.UnixNano() - startTime.UnixNano())
-        fmt.Printf("Time spent on encrypting: %v\n", afterEncrypting.UnixNano() - afterExpandingKey.UnixNano())
-        fmt.Printf("Time spent: %v\n", afterEncrypting.UnixNano() - startTime.UnixNano())
-    }
+    afterEncrypting := time.Now()
+    fmt.Println("\nStatistic:")
+    fmt.Printf("Time spent on blowfish algorithm: %v\n", afterExpandingKey.UnixNano() - startTime.UnixNano())
+    fmt.Printf("Time spent on encrypting: %v\n", afterEncrypting.UnixNano() - afterExpandingKey.UnixNano())
+    fmt.Printf("Time spent: %v\n", afterEncrypting.UnixNano() - startTime.UnixNano())
 
     return nil
 }
