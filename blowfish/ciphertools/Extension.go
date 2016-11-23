@@ -2,7 +2,7 @@ package ciphertools
 
 import (
     "strconv"
-    "fmt"
+    "github.com/golang/glog"
 )
 
 type KeySizeError int
@@ -15,7 +15,7 @@ func getNextWord(b []byte, pos *int) uint32 {
     var w uint32
     j := *pos
     for i := 0; i < 4; i++ {
-        w = w<<8 | uint32(b[j])
+        w = w << 8 | uint32(b[j])
         j++
         if j >= len(b) {
             j = 0
@@ -26,7 +26,7 @@ func getNextWord(b []byte, pos *int) uint32 {
 }
 
 func (c *Cipher) expandKey(key []byte) error {
-    fmt.Println("Expanding key...")
+    glog.Infoln("Expanding key...")
 
     if k := len(key); k < 1 || k > 56 {
         return KeySizeError(k)

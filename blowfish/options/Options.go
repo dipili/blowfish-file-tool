@@ -3,6 +3,7 @@ package options
 import (
     "fmt"
     "flag"
+    "github.com/golang/glog"
 )
 
 const (
@@ -30,7 +31,7 @@ func (f WrongArgumentsError) Error() string {
 }
 
 func (options *Options) Validate() (err WrongArgumentsError) {
-    fmt.Println("Parsing arguments...")
+    glog.Infoln("Parsing arguments...")
     if (!flag.Parsed()) {
         err = "Use flag.Parse first()"
         return

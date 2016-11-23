@@ -1,12 +1,12 @@
 package main
 
 import (
-    "fmt"
     "flag"
     "io/ioutil"
     "os"
     "github.com/diplombmstu/blowfish-file-tool/blowfish/ciphertools/files"
     "github.com/diplombmstu/blowfish-file-tool/blowfish/options"
+    "github.com/golang/glog"
 )
 
 var pars options.Options
@@ -21,31 +21,31 @@ func init() {
 }
 
 func main() {
-    fmt.Println("Starting blowfish cipher tool...")
     flag.Parse()
+    glog.Infoln("Starting blowfish cipher tool...")
 
     if err := pars.Validate(); err != "" {
-        fmt.Println(err)
+        glog.Errorln(err)
         return
     }
 
-    fmt.Printf("Program arguments: %v\n", pars)
+    glog.Infof("Program arguments: %v\n", pars)
 
     key, err := ioutil.ReadFile(pars.KeyFile)
     if err != nil {
-        fmt.Printf("Error: %v", err)
+        glog.Errorln(err.Error())
         return
     }
 
     inputFile, err := os.Open(pars.InputFile)
     if err != nil {
-        fmt.Printf("Error: %v", err)
+        glog.Infof("Error: %v", err)
         return
     }
 
     outputFile, err := os.Create(pars.OutputFile)
     if err != nil {
-        fmt.Printf("Error: %v", err)
+        glog.Infof("Error: %v", err)
         return
     }
 
@@ -57,7 +57,7 @@ func main() {
     }
 
     if errOperation != nil {
-        fmt.Printf("Error: %v", errOperation)
+        glog.Errorf("Error: %v", errOperation)
         return
     }
 

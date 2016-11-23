@@ -4,16 +4,16 @@ import (
     "bufio"
     "io"
     "os"
-    "fmt"
     "time"
     "github.com/diplombmstu/blowfish-file-tool/blowfish/ciphertools"
     "github.com/diplombmstu/blowfish-file-tool/blowfish/options"
     "encoding/binary"
     "crypto/rand"
+    "github.com/golang/glog"
 )
 
 func Decrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
-    fmt.Printf("Decrypting file %v... \n", inputFile.Name())
+    glog.Infof("Decrypting file %v... \n", inputFile.Name())
 
     startTime := time.Now()
 
@@ -24,7 +24,7 @@ func Decrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
 
     afterExpandingKey := time.Now()
 
-    fmt.Println("Decrypting...")
+    glog.Infoln("Decrypting...")
 
     reader := bufio.NewReader(inputFile)
     writer := bufio.NewWriter(outputFile)
@@ -39,7 +39,7 @@ func Decrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
 
     for blockSize, err := reader.Read(block); blockSize != 0; blockSize, err = reader.Read(block) {
         if blockSize != 8 {
-            fmt.Printf("Error. Data is damaged. Wrong block length. Block size: %v\n", blockSize)
+            glog.Errorf("Error. Data is damaged. Wrong block length. Block size: %v\n", blockSize)
             break
         }
 
@@ -56,7 +56,7 @@ func Decrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
 
             extraSymbolCount := int(lastByte)
             if extraSymbolCount > 8 {
-                fmt.Printf("Service symbol is incorrect. %v\n", extraSymbolCount)
+                glog.Infof("Service symbol is incorrect. %v\n", extraSymbolCount)
                 return nil
             }
 
@@ -78,19 +78,18 @@ func Decrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
 
     writer.Flush()
 
-    fmt.Println("Decrypting successfully finished.")
+    glog.Infoln("Decrypting successfully finished.")
 
     afterEncrypting := time.Now()
-    fmt.Println("\nStatistic:")
-    fmt.Printf("Time spent on blowfish algorithm: %v\n", afterExpandingKey.UnixNano() - startTime.UnixNano())
-    fmt.Printf("Time spent on encrypting: %v\n", afterEncrypting.UnixNano() - afterExpandingKey.UnixNano())
-    fmt.Printf("Time spent: %v\n", afterEncrypting.UnixNano() - startTime.UnixNano())
+    glog.Infof("Time spent on blowfish algorithm: %v\n", afterExpandingKey.UnixNano() - startTime.UnixNano())
+    glog.Infof("Time spent on encrypting: %v\n", afterEncrypting.UnixNano() - afterExpandingKey.UnixNano())
+    glog.Infof("Time spent: %v\n", afterEncrypting.UnixNano() - startTime.UnixNano())
 
     return nil
 }
 
 func Encrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
-    fmt.Printf("Encrypting file %v... \n", inputFile.Name())
+    glog.Infof("Encrypting file %v... \n", inputFile.Name())
 
     startTime := time.Now()
 
@@ -101,7 +100,7 @@ func Encrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
 
     afterExpandingKey := time.Now()
 
-    fmt.Println("Encrypting..")
+    glog.Infoln("Encrypting..")
 
     reader := bufio.NewReader(inputFile)
     writer := bufio.NewWriter(outputFile)
@@ -134,16 +133,14 @@ func Encrypt(inputFile, outputFile *os.File, key []byte, mode string) error {
     }
 
     writer.WriteByte(byte(extraSymbolsCount))
-
     writer.Flush()
 
-    fmt.Println("Encrypting successfully finished.")
+    glog.Infoln("Encrypting successfully finished.")
 
     afterEncrypting := time.Now()
-    fmt.Println("\nStatistic:")
-    fmt.Printf("Time spent on blowfish algorithm: %v\n", afterExpandingKey.UnixNano() - startTime.UnixNano())
-    fmt.Printf("Time spent on encrypting: %v\n", afterEncrypting.UnixNano() - afterExpandingKey.UnixNano())
-    fmt.Printf("Time spent: %v\n", afterEncrypting.UnixNano() - startTime.UnixNano())
+    glog.Infof("Time spent on blowfish algorithm: %v\n", afterExpandingKey.UnixNano() - startTime.UnixNano())
+    glog.Infof("Time spent on encrypting: %v\n", afterEncrypting.UnixNano() - afterExpandingKey.UnixNano())
+    glog.Infof("Time spent: %v\n", afterEncrypting.UnixNano() - startTime.UnixNano())
 
     return nil
 }
@@ -171,6 +168,20 @@ func xorBytes(a, b []byte) (dst []byte, n int) {
     }
 
     return
+}
+
+func rotateSliceLeft(slice []interface{}, p int) {
+    sliceLen := len(slice)
+    for i := p - 1; i < sliceLen; i++ {
+        slice[i - p] = slice[i]
+    }
+}
+
+func rotateSliceRight(slice []interface{}, p int) {
+    sliceLen := len(slice)
+    for i := sliceLen - p; i < sliceLen; i-- {
+        slice[i + p] = slice[i]
+    }
 }
 
 func decryptBlock(cipher *ciphertools.Cipher, cipherText []byte, mode string) []byte {
