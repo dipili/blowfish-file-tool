@@ -43,7 +43,7 @@ func CreateMode(modeName string) ICipherMode {
         return NewPcbcMode()
         break
     case options.MODE_CFB:
-        return NewPcbcMode()
+        return NewCfbMode()
         break
     case options.MODE_OFB:
         return NewOfbMode()
