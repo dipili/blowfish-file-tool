@@ -20,7 +20,6 @@ type Options struct {
     KeyFile    string
     Encryption bool
     Decryption bool
-    Debug      bool
     Mode       string
 }
 

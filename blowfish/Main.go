@@ -14,7 +14,6 @@ var pars options.Options
 func init() {
     flag.BoolVar(&pars.Encryption, "encrypt", false, "Should be set if you want to encrypt a specified file.")
     flag.BoolVar(&pars.Decryption, "decrypt", false, "Should be set if you want to decrypt a specified file.")
-    flag.BoolVar(&pars.Debug, "debug", false, "Enables additional output information.")
     flag.StringVar(&pars.InputFile, "input", "", "Input file.")
     flag.StringVar(&pars.OutputFile, "output", "", "Output file.")
     flag.StringVar(&pars.KeyFile, "key", "", "Key file.")
@@ -30,9 +29,7 @@ func main() {
         return
     }
 
-    if pars.Debug {
-        fmt.Printf("Program arguments: %v\n", pars)
-    }
+    fmt.Printf("Program arguments: %v\n", pars)
 
     key, err := ioutil.ReadFile(pars.KeyFile)
     if err != nil {
