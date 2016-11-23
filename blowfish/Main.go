@@ -7,6 +7,7 @@ import (
     "github.com/diplombmstu/blowfish-file-tool/blowfish/ciphertools/files"
     "github.com/diplombmstu/blowfish-file-tool/blowfish/options"
     "github.com/golang/glog"
+    "github.com/diplombmstu/blowfish-file-tool/blowfish/ciphertools/modes"
 )
 
 var pars options.Options
@@ -51,9 +52,9 @@ func main() {
 
     var errOperation error
     if pars.Encryption {
-        errOperation = files.Encrypt(inputFile, outputFile, key, pars.Mode)
+        errOperation = files.Encrypt(inputFile, outputFile, key, modes.CreateMode(pars.Mode))
     } else {
-        errOperation = files.Decrypt(inputFile, outputFile, key, pars.Mode)
+        errOperation = files.Decrypt(inputFile, outputFile, key, modes.CreateMode(pars.Mode))
     }
 
     if errOperation != nil {
